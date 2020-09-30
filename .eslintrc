@@ -10,7 +10,8 @@
     "linebreak-style": "off",
     "arrow-parens": "off",
     "require-jsdoc": "off",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "max-len": ["warn", { "code": 100 }]
   },
   "extends": ["eslint:recommended", "google"]
 }
