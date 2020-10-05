@@ -16,6 +16,7 @@
     text-align: center;
     border-right: 1px solid $border-color;
     min-width: $info-cell-width;
+    user-select: none;
   }
   .input {
     padding: 4px;
