@@ -2,31 +2,47 @@ const CODES = {
   A: 65,
   Z: 90,
 }
+const DEFAULT_WIDTH = 120
+const DEFAULT_HEIGHT = 24
 
-function toCell(row, col) {
-  return `
-  <div class="cell" contenteditable
-    data-col="${col}"
-    data-type="cell"
-    data-id="${row}:${col}">
-  </div>
-  `
+function getWidth(state, index) {
+  if (!state) return false
+  return state[index] || DEFAULT_WIDTH
 }
 
-function toColumn(col, index) {
+function getHeight(state, index) {
+  if (!state) return false
+  return state[index] || DEFAULT_HEIGHT
+}
+
+function toCell(state, row) {
+  return function(_, col) {
+    return `
+      <div class="cell" contenteditable
+        data-col="${col}"
+        data-type="cell"
+        data-id="${row}:${col}"
+        style="width:${getWidth(state, col)}px"
+        >
+      </div>
+      `
+  }
+}
+
+function toColumn({col, index, width = DEFAULT_WIDTH}) {
   return `
-    <div class="column" data-type="resizable" data-col="${index}">
+    <div class="column" data-type="resizable" data-col="${index}" style="width: ${width}px;">
       ${col}
       <div class="col-resize" data-resize="col"></div>
     </div>
   `
 }
 
-function createRow(index = '', content) {
+function createRow(index = '', content, height = DEFAULT_HEIGHT) {
   const resize = index ? '<div class="row-resize" data-resize="row"></div>' : ''
 
   return `
-    <div class="row" data-type="resizable">
+    <div class="row" data-type="resizable" data-row="${index - 1}" style="height: ${height}px;">
       <div class="row-info">
         ${index ? index : ''}
         ${resize}        
@@ -40,20 +56,32 @@ function toChar(_, index) {
   return String.fromCharCode(CODES.A + index)
 }
 
-export function createTable(rowsCount = 150) {
+function withWidthFrom(state) {
+  return function(col, index) {
+    return {
+      col,
+      index,
+      width: getWidth(state.colState, index),
+    }
+  }
+}
+
+export function createTable(rowsCount = 50, state = {}) {
   const colsCount = CODES.Z - CODES.A + 1
   const rows = []
 
-  const cols = new Array(colsCount).fill('').map(toChar).map(toColumn).join('')
+  const cols = new Array(colsCount)
+      .fill('')
+      .map(toChar)
+      .map(withWidthFrom(state))
+      .map(toColumn)
+      .join('')
 
   rows.push(createRow(null, cols))
 
   for (let row = 0; row < rowsCount; row++) {
-    const cells = new Array(colsCount)
-        .fill('')
-        .map((_, col) => toCell(row, col))
-        .join('')
-    rows.push(createRow(row + 1, cells))
+    const cells = new Array(colsCount).fill('').map(toCell(state.colState, row)).join('')
+    rows.push(createRow(row + 1, cells, getHeight(state.rowState, row)))
   }
 
   return rows.join('')
