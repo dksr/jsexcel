@@ -1,5 +1,4 @@
 import {createStore} from './createStore'
-import {resolve} from '../../../webpack.config'
 
 const initialState = {
   count: 0,
