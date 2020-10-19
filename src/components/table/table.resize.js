@@ -19,11 +19,12 @@ export function resizeHandler($root, event) {
 
     document.onmousemove = (e) => {
       if (type == 'col') {
-        const delta = e.pageX - coords.right
+        const delta = e.clientX - coords.right
         value = coords.width + delta
         $resizer.css({right: -delta + 'px'})
       } else {
-        const delta = e.pageY - coords.bottom
+        const delta = e.clientY - coords.bottom
+        console.log(e)
         value = coords.height + delta
         $resizer.css({bottom: -delta + 'px'})
       }
